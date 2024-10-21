@@ -1,4 +1,4 @@
-# WebFFX
+# WebFFX: Local-first Converter
 
 
 基于 <a href="https://ffmpegwasm.netlify.app/">ffmpeg.wasm</a>、<a href="https://www.typescriptlang.org/" >Typescript</a>、<a href="https://nextjs.org/" >Next.js</a> 构建
