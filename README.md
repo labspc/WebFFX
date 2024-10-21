@@ -1,41 +1,50 @@
-# ffmpeg-online
+# WebFFX
 
-> https://ffmpeg-online.vercel.app/
 
-An online version of ffmpeg based on ffmpeg.wasm, which can be used to process audio and video online
+基于 <a href="https://ffmpegwasm.netlify.app/">ffmpeg.wasm</a>、<a href="https://www.typescriptlang.org/" >Typescript</a>、<a href="https://nextjs.org/" >Next.js</a> 构建
 
-## Clip video
+        
+## 项目架构
 
-In ffmpeg, the command for video clipping is
+- **根目录**:
+  - <i class="fas fa-file-code"></i> `.editorconfig`: 编辑器配置文件，确保不同开发者之间的代码风格一致。
+  - <i class="fas fa-file-code"></i> `.eslintrc.json`: ESLint 配置文件，用于代码质量和风格检查。
+  - <i class="fas fa-file-code"></i> `.gitignore`: Git 忽略文件配置。
+  - <i class="fas fa-file-code"></i> `babel.config.js`: Babel 配置文件，用于 JavaScript 代码的编译。
+  - <i class="fas fa-file-code"></i> `next-env.d.ts`: Next.js 的 TypeScript 环境配置文件。
+  - <i class="fas fa-file-code"></i> `next.config.js`: Next.js 配置文件。
+  - <i class="fas fa-file-code"></i> `package.json`: 项目依赖和脚本配置文件。
+  - <i class="fas fa-file-code"></i> `tsconfig.json`: TypeScript 配置文件。
+  - <i class="fas fa-file-code"></i> `typings.d.ts`: 全局类型定义文件。
+  - <i class="fas fa-file-code"></i> `README.md`: 项目说明文件。
 
-```shell
-ffmpeg -i test.mp4 -ss 00:00:00 -t 00:00:05 -vcodec copy -acodec copy output.mp4
-```
+- **.next/**:
+  - <i class="fas fa-file-code"></i> `build-manifest.json`: 构建清单文件。
+  - <i class="fas fa-folder"></i> `cache/`: 缓存目录。
+  - <i class="fas fa-folder"></i> `server/`: 服务器相关文件和配置。
+    - <i class="fas fa-file-code"></i> `middleware-build-manifest.js`: 中间件构建清单。
+    - <i class="fas fa-file-code"></i> `middleware-manifest.json`: 中间件清单文件。
+    - <i class="fas fa-file-code"></i> `middleware-react-loadable-manifest.js`: 中间件 React 可加载清单。
+    - <i class="fas fa-file-code"></i> `next-font-manifest.js`: 字体清单文件。
+    - <i class="fas fa-file-code"></i> `next-font-manifest.json`: 字体清单文件。
+    - <i class="fas fa-folder"></i> `pages/`: 页面目录。
 
-You can upload the `test.mp4` file and run the command following the example below
+- **pages/**:
+  - <i class="fas fa-file-code"></i> `_app.tsx`: 自定义 App 组件。
+  - <i class="fas fa-folder"></i> `api/`: API 路由目录。
+  - <i class="fas fa-folder"></i> `app/`: 应用程序目录。
+  - <i class="fas fa-file-code"></i> `index.tsx`: 首页组件。
 
-![](./demo/clip-video.jpg)
+- **public/**:
+  - <i class="fas fa-folder"></i> `static/`: 静态资源目录。
 
-## Audio and video synthesis
+## 主要依赖包
 
-In ffmpeg, the command for audio and video synthesis is
+在 `package.json` 文件中定义了项目的主要依赖包。以下是一些关键的依赖包：
 
-```shell
-ffmpeg -i test.mp4 -i test.mp3 -c:v copy -c:a aac -strict experimental -map 0:v:0 -map 1:a:0 -shortest output.mp4
-```
+- <i class="fas fa-box"></i> `next`: Next.js 框架，用于服务端渲染和静态网站生成。
+- <i class="fas fa-box"></i> `react`: React 库，用于构建用户界面。
+- <i class="fas fa-box"></i> `react-dom`: React DOM 库，用于在浏览器中渲染 React 组件。
+- <i class="fas fa-box"></i> `typescript`: TypeScript 语言，用于静态类型检查。
 
-You can upload the `test.mp4` `test.mp3` file and run the command following the example below
-
-![](./demo/video-audio.jpg)
-
-## Crop video
-
-In ffmpeg, the command for video cropping is
-
-```shell
-ffmpeg -i test.mp4 -strict -2 -vf crop=1126:742:0:420 output.mp4
-```
-
-You can upload the `test.mp4` file and run the command following the example below
-
-![](./demo/crop-video.jpg)
+你可以在 `package.json` 文件中查看所有的依赖包和版本信息。
