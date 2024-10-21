@@ -8,6 +8,8 @@ import numerify from "numerify";
 import qs from "query-string";
 import JSZip from "jszip";
 
+import Head from 'next/head'; // 添加这一行
+
 const { Dragger } = Upload;
 
 interface OutputFile {
@@ -25,9 +27,9 @@ const App = () => {
   const [href, setHref] = useState("");
   const [file, setFile] = useState<File | undefined>();
   const [fileList, setFileList] = useState<File[]>([]);
-  const [name, setName] = useState("input.jpg");
-  const [output, setOutput] = useState("WebFFX.png");
-  const [downloadFileName, setDownloadFileName] = useState("WebFFX.png");
+  const [name, setName] = useState("");
+  const [output, setOutput] = useState("");
+  const [downloadFileName, setDownloadFileName] = useState("");
   const ffmpeg = useRef<any>();
   const currentFSls = useRef<string[]>([]);
 
@@ -66,7 +68,7 @@ const App = () => {
         );
         setHref(objectURL);
         setDownloadFileName(outputFiles[0]);
-        message.success("运行成功，点击下载按钮下载输出文件", 10);
+        message.success("运行成功，点击下载链接下载输出文件", 10);
       } else if (outputFiles.length > 1) {
         var zip = new JSZip();
         outputFiles.forEach((filleName: string) => {
@@ -77,7 +79,7 @@ const App = () => {
         const objectURL = URL.createObjectURL(zipFile);
         setHref(objectURL);
         setDownloadFileName("output.zip");
-        message.success("运行成功，点击下载按钮下载输出文件", 10);
+        message.success("运行成功，点击下载链接下载输出文件", 10);
       } else {
         message.success("运行成功，未生成文件，如需查看 FFmpeg 命令输出，请打开控制台", 10);
       }
@@ -163,7 +165,8 @@ const App = () => {
     const month = String(utc8Time.getUTCMonth() + 1).padStart(2, '0');
     const day = String(utc8Time.getUTCDate()).padStart(2, '0');
     const hour = String(utc8Time.getUTCHours()).padStart(2, '0');
-    setOutput(`output_${year}${month}${day}${hour}.png`);
+    const minute = String(utc8Time.getUTCMinutes()).padStart(2, '0');
+    setOutput(`output_${year}${month}${day}T${hour}${minute}.png`);
   };
 
   const beforeUpload = (file: File, fileList: File[]) => {
@@ -191,7 +194,7 @@ const App = () => {
       )}
 
       <h1 style={{ textAlign: "center", fontSize: "2em", fontWeight: "bold", margin: "10px 0" }}>WebFFX</h1>
-      {/* <p style={{ textAlign: "center", fontSize: "1em", color: "gray", margin: "5px 0" }}>使用 ffmpeg.wasm 构建</p> */}
+      <p style={{ textAlign: "center", fontSize: "1em", color: "gray", margin: "5px 0" }}>Local-fisrt Converter</p>
 
       <h4>1. 选择文件</h4>
       <p style={{ color: "gray" }}>
@@ -200,12 +203,12 @@ const App = () => {
       <Dragger
         multiple
         beforeUpload={beforeUpload}
-        style={{ padding: "10px" }}
+        style={{ padding: "22px", maxWidth: "420px", margin: "0 auto", border: "2px dashed #1890ff", borderRadius: "8px", backgroundColor: "#f0f2f5" }}
       >
-        <p className="ant-upload-drag-icon">
+        <p className="ant-upload-drag-icon" style={{ color: "#1890ff" }}>
           <InboxOutlined />
         </p>
-        <p className="ant-upload-text">点击或拖动文件</p>
+        <p className="ant-upload-text" style={{ color: "#1890ff" }}>点击或拖动文件到此区域</p>
       </Dragger>
       <style jsx>{`
         @media (max-width: 600px) {
@@ -223,12 +226,12 @@ const App = () => {
       <p style={{ color: "red", marginTop: "10px" }}>
         文件大小限制: 图片文件应小于20MB，视频文件应小于200MB
       </p>
-      
+
       <h4>2. 设置 FFmpeg 选项</h4>
       <div className="exec">
         <Input
           value={outputOptions}
-          placeholder="可选：请输入输出选项"
+          placeholder="可选：请输入输出选项(通常填写)"
           onChange={(event) => setOutputOptions(event.target.value)}
           style={{ marginBottom: "10px" }}
         />
@@ -239,12 +242,15 @@ const App = () => {
           style={{ marginBottom: "10px" }}
         />
         <Space direction="vertical" size="middle">
+          <p style={{ color: "red", marginTop: "8px" }}>
+            提示：文件后缀名可自定义
+          </p>
           <Button type="primary" onClick={handleTimestampOutput}>
             使用时间戳命名输出文件
           </Button>
-          <div className="command-text" style={{ wordBreak: "break-all" }}>
+          {/* <div className="command-text" style={{ wordBreak: "break-all" }}>
             ffmpeg {inputOptions} {name} {outputOptions} {output}
-          </div>
+          </div> */}
         </Space>
       </div>
       <h4>3. 运行并获取输出文件</h4>
@@ -266,10 +272,10 @@ const App = () => {
           <br />
         </div>
       ))}
-      
-      
-      
-      
+
+
+
+
       <Analytics />
       <footer style={{ textAlign: "center", padding: "20px 0", marginTop: "40px", backgroundColor: "#f0f2f5" }}>
         <div style={{ fontSize: "16px", color: "#555" }}>
@@ -277,9 +283,9 @@ const App = () => {
         </div>
         <div style={{ textAlign: "center", marginTop: "10px", fontSize: "14px", color: "#777" }}>
           <pre style={{ backgroundColor: "#f0f2f5", border: "none", padding: "0" }}>
-        <code>
-          基于 <a href="https://ffmpegwasm.netlify.app/" style={{ color: "#1890ff" }}>ffmpeg.wasm</a>、<a href="https://www.typescriptlang.org/" style={{ color: "#1890ff" }}>Typescript</a>、<a href="https://nextjs.org/" style={{ color: "#1890ff" }}>Next.js</a> 构建
-        </code>
+            <code>
+              基于 <a href="https://ffmpegwasm.netlify.app/" style={{ color: "#1890ff" }}>ffmpeg.wasm</a>、<a href="https://www.typescriptlang.org/" style={{ color: "#1890ff" }}>TypeScript</a>、<a href="https://nextjs.org/" style={{ color: "#1890ff" }}>Next.js</a> 构建
+            </code>
           </pre>
         </div>
       </footer>

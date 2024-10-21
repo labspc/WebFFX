@@ -2,6 +2,10 @@ import "antd/dist/reset.css";
 import "./app/index.css";
 import Script from "next/script";
 
+// pages/_app.tsx
+import type { AppProps } from 'next/app';
+import 'styles/globals.css'; // 引入全局 CSS 文件
+
 function MyApp({ Component, pageProps }: { Component: React.ComponentType, pageProps: any }) {
   return (
     <>
