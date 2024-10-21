@@ -1,4 +1,4 @@
-import "antd/dist/antd.css";
+import "antd/dist/reset.css";
 import "./app/index.css";
 import Script from "next/script";
 

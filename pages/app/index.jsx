@@ -1,7 +1,7 @@
-import { Spin, Upload, Input, Button, message } from "antd";
+import { Spin, Upload, Input, Button, message, Space, List } from "antd";
 import { useEffect, useRef, useState } from "react";
 import { createFFmpeg, fetchFile } from "@ffmpeg/ffmpeg";
-import { InboxOutlined } from "@ant-design/icons";
+import { InboxOutlined, DeleteOutlined } from "@ant-design/icons";
 import { fileTypeFromBuffer } from "file-type";
 import { Analytics } from "@vercel/analytics/react";
 import numerify from "numerify/lib/index.cjs";
@@ -20,9 +20,9 @@ const App = () => {
   const [href, setHref] = useState("");
   const [file, setFile] = useState();
   const [fileList, setFileList] = useState([]);
-  const [name, setName] = useState("input.mp4");
-  const [output, setOutput] = useState("output.mp4");
-  const [downloadFileName, setDownloadFileName] = useState("output.mp4");
+  const [name, setName] = useState("input.jpg");
+  const [output, setOutput] = useState("today.png");
+  const [downloadFileName, setDownloadFileName] = useState("today.png");
   const ffmpeg = useRef();
   const currentFSls = useRef([]);
 
@@ -127,7 +127,7 @@ const App = () => {
         console.log(ratio);
         setTip(numerify(ratio, "0.0%"));
       });
-      setTip("正在加载 ffmpeg 静态资源...");
+      setTip("正在加载 FFmpeg 静态资源...");
       setSpinning(true);
       await ffmpeg.current.load();
       setSpinning(false);
@@ -159,6 +159,23 @@ const App = () => {
     });
   }, [inputOptions, outputOptions, output]);
 
+  // // 生成带时间戳的输出文件名
+  // const handleTimestampOutput = () => {
+  //   const timestamp = new Date().toISOString().replace(/[-:.]/g, "");
+  //   setOutput(`output_${timestamp}.png`);
+  // };
+  // 生成带时间戳的输出文件名
+  const handleTimestampOutput = () => {
+    const now = new Date();
+    const utc8Time = new Date(now.getTime() + 8 * 60 * 60 * 1000);
+    const year = utc8Time.getUTCFullYear();
+    const month = String(utc8Time.getUTCMonth() + 1).padStart(2, '0');
+    const day = String(utc8Time.getUTCDate()).padStart(2, '0');
+    const hour = String(utc8Time.getUTCHours()).padStart(2, '0');
+    setOutput(`output_${year}${month}${day}${hour}.png`);
+  };
+
+  // 2024-10-21主页面前端显示修改部分！
   return (
     <div className="page-app">
       {spinning && (
@@ -167,7 +184,7 @@ const App = () => {
         </Spin>
       )}
 
-      <h2 align="center">ffmpeg-online</h2>
+      <h2 align="center">WebFFX</h2>
 
       <h4>1. 选择文件</h4>
       <p style={{ color: "gray" }}>
@@ -188,12 +205,14 @@ const App = () => {
         <p className="ant-upload-text">点击或拖动文件</p>
       </Dragger>
       <p style={{ color: "gray", marginTop: "10px" }}>
-        支持的文件格式: JPG, PNG, GIF, MP4, AVI, MKV
+        支持的文件格式: JPG, PNG, GIF, MP4, AVI, MKV, MOV
       </p>
-      <h4>2. 设置 ffmpeg 选项</h4>
+      
+      <h4>2. 设置 FFmpeg 选项</h4>
       <div className="exec">
-        ffmpeg
-        <Input
+        {/* ffmpeg */}
+        
+        {/* <Input
           value={inputOptions}
           placeholder="请输入输入选项"
           onChange={(event) => setInputOptions(event.target.value)}
@@ -202,10 +221,10 @@ const App = () => {
           value={name}
           placeholder="请输入输入文件名"
           onChange={(event) => setName(event.target.value)}
-        />
+        /> */}
         <Input
           value={outputOptions}
-          placeholder="请输入输出选项"
+          placeholder="可选：请输入输出选项"
           onChange={(event) => setOutputOptions(event.target.value)}
         />
         <Input
@@ -213,9 +232,20 @@ const App = () => {
           placeholder="请输入下载文件名"
           onChange={(event) => setOutput(event.target.value)}
         />
+        
+        {/* <Button onClick={handleTimestampOutput}>使用时间戳命名输出文件</Button>
         <div className="command-text">
           ffmpeg {inputOptions} {name} {outputOptions} {output}
-        </div>
+        </div> */}
+        <Space direction="vertical" size="middle">
+          <Button type="primary" onClick={handleTimestampOutput}>
+            使用时间戳命名输出文件
+          </Button>
+          <div className="command-text">
+            ffmpeg {inputOptions} {name} {outputOptions} {output}
+          </div>
+        </Space>
+        
       </div>
       <h4>3. 运行并获取输出文件</h4>
       <Button type="primary" disabled={!Boolean(file)} onClick={handleExec}>
@@ -228,7 +258,9 @@ const App = () => {
           下载文件
         </a>
       )}
-      <h4>4. 从文件系统获取其他文件（使用逗号分隔）</h4>
+
+      {/* 不在前端页面进行显示 */}
+      {/* <h4>4. 从文件系统获取其他文件（使用逗号分隔）</h4>
       <p style={{ color: "gray" }}>
         在某些情况下，输出文件包含多个文件。此时，可以在下面的输入框中输入多个文件名，并用逗号分隔。
       </p>
@@ -239,7 +271,8 @@ const App = () => {
       />
       <Button type="primary" disabled={!Boolean(file)} onClick={handleGetFiles}>
         确认
-      </Button>
+      </Button> */}
+      
       <br />
       <br />
       {outputFiles.map((outputFile, index) => (
@@ -252,7 +285,8 @@ const App = () => {
       ))}
       <br />
       <br />
-      <a
+
+      {/* <a
         href="https://github.com/xiguaxigua/ffmpeg-online"
         target="_blank"
         className="github-corner"
@@ -288,7 +322,7 @@ const App = () => {
             className="octo-body"
           ></path>
         </svg>
-      </a>
+      </a> */}
       <Analytics />
     </div>
   );
