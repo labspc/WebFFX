@@ -1,4 +1,6 @@
 const webpack = require("webpack");
+const withTM = require('next-transpile-modules')(['numerify']);
+const NodePolyfillPlugin = require('node-polyfill-webpack-plugin');
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
@@ -21,7 +23,8 @@ const nextConfig = {
           default:
             throw new Error(`Not found ${mod}`);
         }
-      })
+      }),
+      new NodePolyfillPlugin()
     );
 
     return config;
@@ -54,4 +57,4 @@ const nextConfig = {
   },
 };
 
-module.exports = nextConfig;
+module.exports = withTM(nextConfig);

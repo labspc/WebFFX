@@ -26,8 +26,8 @@ const App = () => {
   const [file, setFile] = useState<File | undefined>();
   const [fileList, setFileList] = useState<File[]>([]);
   const [name, setName] = useState("input.jpg");
-  const [output, setOutput] = useState("today.png");
-  const [downloadFileName, setDownloadFileName] = useState("today.png");
+  const [output, setOutput] = useState("WebFFX.png");
+  const [downloadFileName, setDownloadFileName] = useState("WebFFX.png");
   const ffmpeg = useRef<any>();
   const currentFSls = useRef<string[]>([]);
 
