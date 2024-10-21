@@ -37,13 +37,19 @@ const App = () => {
       setTip("Loading file into browser");
       setSpinning(true);
       for (const fileItem of fileList) {
-        ffmpeg.current.FS(
+
+        // FFmpeg 的虚拟文件系统（Virtual File System，简称 VFS）是一个在浏览器环境中模拟的文件系统，
+        // 用于在 Web 应用中处理文件操作。它允许你在不依赖实际文件系统的情况下，读写文件并执行 FFmpeg 命令。
+        // FS 是 FFmpeg 提供的一个接口，用于与虚拟文件系统进行交互。
+        ffmpeg.current.FS( 
           "writeFile",
           fileItem.name,
           await fetchFile(fileItem)
         );
       }
       currentFSls.current = ffmpeg.current.FS("readdir", ".");
+
+      // 命令的输入和输出选项由用户在界面上输入。
       setTip("start executing the command");
       await ffmpeg.current.run(
         ...inputOptions.split(" "),
@@ -52,6 +58,9 @@ const App = () => {
         output
       );
       setSpinning(false);
+      
+      // 从 FFmpeg 的虚拟文件系统中读取生成的输出文件
+      // 根据输出文件的数量生成下载链接或压缩文件
       const FSls = ffmpeg.current.FS("readdir", ".");
       const outputFiles = FSls.filter((i) => !currentFSls.current.includes(i));
       if (outputFiles.length === 1) {
