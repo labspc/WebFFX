@@ -231,7 +231,7 @@ const App = () => {
       <div className="exec">
         <Input
           value={outputOptions}
-          placeholder="可选：请输入输出选项(通常填写)"
+          placeholder="可选：请输入输出选项(通常不填写)"
           onChange={(event) => setOutputOptions(event.target.value)}
           style={{ marginBottom: "10px" }}
         />
