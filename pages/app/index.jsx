@@ -26,6 +26,7 @@ const App = () => {
   const ffmpeg = useRef();
   const currentFSls = useRef([]);
 
+  // 执行 FFmpeg 命令的函数
   const handleExec = async () => {
     if (!file) {
       return;
@@ -34,23 +35,16 @@ const App = () => {
     setHref("");
     setDownloadFileName("");
     try {
-      setTip("Loading file into browser");
+      setTip("正在加载文件到浏览器");
       setSpinning(true);
       for (const fileItem of fileList) {
-
-        // FFmpeg 的虚拟文件系统（Virtual File System，简称 VFS）是一个在浏览器环境中模拟的文件系统，
-        // 用于在 Web 应用中处理文件操作。它允许你在不依赖实际文件系统的情况下，读写文件并执行 FFmpeg 命令。
-        // FS 是 FFmpeg 提供的一个接口，用于与虚拟文件系统进行交互。
-        ffmpeg.current.FS( 
-          "writeFile",
-          fileItem.name,
-          await fetchFile(fileItem)
-        );
+        // 将文件写入 FFmpeg 的虚拟文件系统
+        ffmpeg.current.FS("writeFile", fileItem.name, await fetchFile(fileItem));
       }
       currentFSls.current = ffmpeg.current.FS("readdir", ".");
 
-      // 命令的输入和输出选项由用户在界面上输入。
-      setTip("start executing the command");
+      // 执行 FFmpeg 命令
+      setTip("开始执行命令");
       await ffmpeg.current.run(
         ...inputOptions.split(" "),
         name,
@@ -58,9 +52,8 @@ const App = () => {
         output
       );
       setSpinning(false);
-      
-      // 从 FFmpeg 的虚拟文件系统中读取生成的输出文件
-      // 根据输出文件的数量生成下载链接或压缩文件
+
+      // 读取生成的输出文件
       const FSls = ffmpeg.current.FS("readdir", ".");
       const outputFiles = FSls.filter((i) => !currentFSls.current.includes(i));
       if (outputFiles.length === 1) {
@@ -72,10 +65,7 @@ const App = () => {
         );
         setHref(objectURL);
         setDownloadFileName(outputFiles[0]);
-        message.success(
-          "Run successfully, click the download button to download the output file",
-          10
-        );
+        message.success("运行成功，点击下载按钮下载输出文件", 10);
       } else if (outputFiles.length > 1) {
         var zip = new JSZip();
         outputFiles.forEach((filleName) => {
@@ -86,25 +76,17 @@ const App = () => {
         const objectURL = URL.createObjectURL(zipFile);
         setHref(objectURL);
         setDownloadFileName("output.zip");
-        message.success(
-          "Run successfully, click the download button to download the output file",
-          10
-        );
+        message.success("运行成功，点击下载按钮下载输出文件", 10);
       } else {
-        message.success(
-          "Run successfully, No files are generated, if you want to see the output of the ffmpeg command, please open the console",
-          10
-        );
+        message.success("运行成功，未生成文件，如需查看 FFmpeg 命令输出，请打开控制台", 10);
       }
     } catch (err) {
       console.error(err);
-      message.error(
-        "Failed to run, please check if the command is correct or open the console to view the error details",
-        10
-      );
+      message.error("运行失败，请检查命令是否正确或打开控制台查看错误详情", 10);
     }
   };
 
+  // 获取文件的函数
   const handleGetFiles = async () => {
     if (!files) {
       return;
@@ -127,13 +109,14 @@ const App = () => {
           href: objectURL,
         });
       } catch (err) {
-        message.error(`${filename} get failed`);
+        message.error(`${filename} 获取失败`);
         console.error(err);
       }
     }
     setOutputFiles(outputFilesData);
   };
 
+  // 加载 FFmpeg 的静态资源
   useEffect(() => {
     (async () => {
       ffmpeg.current = createFFmpeg({
@@ -144,13 +127,14 @@ const App = () => {
         console.log(ratio);
         setTip(numerify(ratio, "0.0%"));
       });
-      setTip("ffmpeg static resource loading...");
+      setTip("正在加载 ffmpeg 静态资源...");
       setSpinning(true);
       await ffmpeg.current.load();
       setSpinning(false);
     })();
   }, []);
 
+  // 从查询字符串中获取输入和输出选项
   useEffect(() => {
     const { inputOptions, outputOptions, output } = qs.parse(
       window.location.search
@@ -166,8 +150,8 @@ const App = () => {
     }
   }, []);
 
+  // 更新查询字符串
   useEffect(() => {
-    // run after inputOptions and outputOptions set from querystring
     setTimeout(() => {
       let queryString = qs.stringify({ inputOptions, outputOptions, output });
       const newUrl = `${location.origin}${location.pathname}?${queryString}`;
@@ -185,10 +169,9 @@ const App = () => {
 
       <h2 align="center">ffmpeg-online</h2>
 
-      <h4>1. Select file</h4>
+      <h4>1. 选择文件</h4>
       <p style={{ color: "gray" }}>
-        Your files will not be uploaded to the server, only processed in the
-        browser
+        您的文件不会上传到服务器，只会在浏览器中处理
       </p>
       <Dragger
         multiple
@@ -202,59 +185,60 @@ const App = () => {
         <p className="ant-upload-drag-icon">
           <InboxOutlined />
         </p>
-        <p className="ant-upload-text">Click or drag file</p>
+        <p className="ant-upload-text">点击或拖动文件</p>
       </Dragger>
-      <h4>2. Set ffmpeg options</h4>
+      <p style={{ color: "gray", marginTop: "10px" }}>
+        支持的文件格式: JPG, PNG, GIF, MP4, AVI, MKV
+      </p>
+      <h4>2. 设置 ffmpeg 选项</h4>
       <div className="exec">
         ffmpeg
         <Input
           value={inputOptions}
-          placeholder="please enter input options"
+          placeholder="请输入输入选项"
           onChange={(event) => setInputOptions(event.target.value)}
         />
         <Input
           value={name}
-          placeholder="please enter input filename"
+          placeholder="请输入输入文件名"
           onChange={(event) => setName(event.target.value)}
         />
         <Input
           value={outputOptions}
-          placeholder="please enter output options"
+          placeholder="请输入输出选项"
           onChange={(event) => setOutputOptions(event.target.value)}
         />
         <Input
           value={output}
-          placeholder="Please enter the download file name"
+          placeholder="请输入下载文件名"
           onChange={(event) => setOutput(event.target.value)}
         />
         <div className="command-text">
           ffmpeg {inputOptions} {name} {outputOptions} {output}
         </div>
       </div>
-      <h4>3. Run and get the output file</h4>
+      <h4>3. 运行并获取输出文件</h4>
       <Button type="primary" disabled={!Boolean(file)} onClick={handleExec}>
-        run
+        运行
       </Button>
       <br />
       <br />
       {href && (
         <a href={href} download={downloadFileName}>
-          download file
+          下载文件
         </a>
       )}
-      <h4>4. Get other file from file system (use , split)</h4>
+      <h4>4. 从文件系统获取其他文件（使用逗号分隔）</h4>
       <p style={{ color: "gray" }}>
-        In some scenarios, the output file contains multiple files. At this
-        time, multiple file names can be separated by commas and typed into the
-        input box below.
+        在某些情况下，输出文件包含多个文件。此时，可以在下面的输入框中输入多个文件名，并用逗号分隔。
       </p>
       <Input
         value={files}
-        placeholder="Please enter the download file name"
+        placeholder="请输入下载文件名"
         onChange={(event) => setFiles(event.target.value)}
       />
       <Button type="primary" disabled={!Boolean(file)} onClick={handleGetFiles}>
-        confirm
+        确认
       </Button>
       <br />
       <br />
