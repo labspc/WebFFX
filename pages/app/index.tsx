@@ -31,7 +31,6 @@ const App = () => {
   const ffmpeg = useRef<any>();
   const currentFSls = useRef<string[]>([]);
 
-  // 执行 FFmpeg 命令的函数
   const handleExec = async () => {
     if (!file) {
       return;
@@ -43,12 +42,10 @@ const App = () => {
       setTip("正在加载文件到浏览器");
       setSpinning(true);
       for (const fileItem of fileList) {
-        // 将文件写入 FFmpeg 的虚拟文件系统
         ffmpeg.current.FS("writeFile", fileItem.name, await fetchFile(fileItem));
       }
       currentFSls.current = ffmpeg.current.FS("readdir", ".");
 
-      // 执行 FFmpeg 命令
       setTip("开始执行命令");
       await ffmpeg.current.run(
         ...inputOptions.split(" "),
@@ -58,7 +55,6 @@ const App = () => {
       );
       setSpinning(false);
 
-      // 读取生成的输出文件
       const FSls = ffmpeg.current.FS("readdir", ".");
       const outputFiles = FSls.filter((i: string) => !currentFSls.current.includes(i));
       if (outputFiles.length === 1) {
@@ -91,7 +87,6 @@ const App = () => {
     }
   };
 
-  // 获取文件的函数
   const handleGetFiles = async () => {
     if (!files) {
       return;
@@ -121,7 +116,6 @@ const App = () => {
     setOutputFiles(outputFilesData);
   };
 
-  // 加载 FFmpeg 的静态资源
   useEffect(() => {
     (async () => {
       ffmpeg.current = createFFmpeg({
@@ -139,7 +133,6 @@ const App = () => {
     })();
   }, []);
 
-  // 从查询字符串中获取输入和输出选项
   useEffect(() => {
     const { inputOptions, outputOptions, output } = qs.parse(
       window.location.search
@@ -155,7 +148,6 @@ const App = () => {
     }
   }, []);
 
-  // 更新查询字符串
   useEffect(() => {
     setTimeout(() => {
       let queryString = qs.stringify({ inputOptions, outputOptions, output });
@@ -164,7 +156,6 @@ const App = () => {
     });
   }, [inputOptions, outputOptions, output]);
 
-  // 生成带时间戳的输出文件名
   const handleTimestampOutput = () => {
     const now = new Date();
     const utc8Time = new Date(now.getTime() + 8 * 60 * 60 * 1000);
@@ -175,6 +166,22 @@ const App = () => {
     setOutput(`output_${year}${month}${day}${hour}.png`);
   };
 
+  const beforeUpload = (file: File, fileList: File[]) => {
+    const isImage = file.type.startsWith("image/");
+    const isVideo = file.type.startsWith("video/");
+    const isValidSize = (isImage && file.size <= 20 * 1024 * 1024) || (isVideo && file.size <= 200 * 1024 * 1024);
+
+    if (!isValidSize) {
+      message.error(`文件 ${file.name} 超过大小限制。图片文件应小于20MB，视频文件应小于200MB。`);
+      return Upload.LIST_IGNORE;
+    }
+
+    setFile(file);
+    setFileList((v) => [...v, ...fileList]);
+    setName(file.name);
+    return false;
+  };
+
   return (
     <div className="page-app">
       {spinning && (
@@ -183,7 +190,8 @@ const App = () => {
         </Spin>
       )}
 
-      <h2 style={{ textAlign: "center" }}>WebFFX</h2>
+      <h1 style={{ textAlign: "center", fontSize: "2em", fontWeight: "bold", margin: "10px 0" }}>WebFFX</h1>
+      {/* <p style={{ textAlign: "center", fontSize: "1em", color: "gray", margin: "5px 0" }}>使用 ffmpeg.wasm 构建</p> */}
 
       <h4>1. 选择文件</h4>
       <p style={{ color: "gray" }}>
@@ -191,20 +199,29 @@ const App = () => {
       </p>
       <Dragger
         multiple
-        beforeUpload={(file, fileList) => {
-          setFile(file);
-          setFileList((v) => [...v, ...fileList]);
-          setName(file.name);
-          return false;
-        }}
+        beforeUpload={beforeUpload}
+        style={{ padding: "10px" }}
       >
         <p className="ant-upload-drag-icon">
           <InboxOutlined />
         </p>
         <p className="ant-upload-text">点击或拖动文件</p>
       </Dragger>
+      <style jsx>{`
+        @media (max-width: 600px) {
+          .ant-upload-drag-icon {
+        font-size: 24px;
+          }
+          .ant-upload-text {
+        font-size: 14px;
+          }
+        }
+      `}</style>
       <p style={{ color: "gray", marginTop: "10px" }}>
         支持的文件格式: JPG, PNG, GIF, MP4, AVI, MKV, MOV
+      </p>
+      <p style={{ color: "red", marginTop: "10px" }}>
+        文件大小限制: 图片文件应小于20MB，视频文件应小于200MB
       </p>
       
       <h4>2. 设置 FFmpeg 选项</h4>
@@ -213,33 +230,33 @@ const App = () => {
           value={outputOptions}
           placeholder="可选：请输入输出选项"
           onChange={(event) => setOutputOptions(event.target.value)}
+          style={{ marginBottom: "10px" }}
         />
         <Input
           value={output}
           placeholder="请输入下载文件名"
           onChange={(event) => setOutput(event.target.value)}
+          style={{ marginBottom: "10px" }}
         />
         <Space direction="vertical" size="middle">
           <Button type="primary" onClick={handleTimestampOutput}>
             使用时间戳命名输出文件
           </Button>
-          <div className="command-text">
+          <div className="command-text" style={{ wordBreak: "break-all" }}>
             ffmpeg {inputOptions} {name} {outputOptions} {output}
           </div>
         </Space>
       </div>
       <h4>3. 运行并获取输出文件</h4>
-      <Button type="primary" disabled={!Boolean(file)} onClick={handleExec}>
+      <Button type="primary" disabled={!Boolean(file)} onClick={handleExec} style={{ marginBottom: "10px" }}>
         运行
       </Button>
-      <br />
       <br />
       {href && (
         <a href={href} download={downloadFileName}>
           下载文件
         </a>
       )}
-      <br />
       <br />
       {outputFiles.map((outputFile, index) => (
         <div key={index}>
@@ -249,9 +266,23 @@ const App = () => {
           <br />
         </div>
       ))}
-      <br />
-      <br />
+      
+      
+      
+      
       <Analytics />
+      <footer style={{ textAlign: "center", padding: "20px 0", marginTop: "40px", backgroundColor: "#f0f2f5" }}>
+        <div style={{ fontSize: "16px", color: "#555" }}>
+          © 2024 WebFFX. Made with <span style={{ color: "#ff4d4f" }}>❤️</span> by Lambert
+        </div>
+        <div style={{ textAlign: "center", marginTop: "10px", fontSize: "14px", color: "#777" }}>
+          <pre style={{ backgroundColor: "#f0f2f5", border: "none", padding: "0" }}>
+        <code>
+          基于 <a href="https://ffmpegwasm.netlify.app/" style={{ color: "#1890ff" }}>ffmpeg.wasm</a>、<a href="https://www.typescriptlang.org/" style={{ color: "#1890ff" }}>Typescript</a>、<a href="https://nextjs.org/" style={{ color: "#1890ff" }}>Next.js</a> 构建
+        </code>
+          </pre>
+        </div>
+      </footer>
     </div>
   );
 };
