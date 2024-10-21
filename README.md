@@ -1,8 +1,8 @@
 # WebFFX
 
-<code>
-基于 <a href="https://ffmpegwasm.netlify.app/" style={{ color: "#1890ff" }}>ffmpeg.wasm</a>、<a href="https://www.typescriptlang.org/" style={{ color: "#1890ff" }}>Typescript</a>、<a href="https://nextjs.org/" style={{ color: "#1890ff" }}>Next.js</a> 构建
-</code>
+
+基于 <a href="https://ffmpegwasm.netlify.app/">ffmpeg.wasm</a>、<a href="https://www.typescriptlang.org/" >Typescript</a>、<a href="https://nextjs.org/" >Next.js</a> 构建
+
         
 ## 项目架构
 
